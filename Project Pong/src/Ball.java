@@ -59,6 +59,11 @@ public class Ball {
         box2X = 1094.0f;
         box2Y = 267.5f;*/
 
+        //for testing
+        /*
+        ballX = 115.0f+100.0f;
+        ballY = 267.5f-150.0f;*/
+
         ball = new Ellipse2D.Float(ballX, ballY, 30.0f, 30.0f);
         box1 = new Rectangle2D.Float(box1X, box1Y, 30.0f, 100.0f);
         box2 = new Rectangle2D.Float(box2X, box2Y, 30.0f, 100.0f);
@@ -82,12 +87,12 @@ public class Ball {
     }
 
 
-
+    //the movement that will be made repeatedly (calculating everything)
     public void ballMove(){
         System.out.println("Starting to move");
-
         ballX += ballMoveX * ballSpeed;
-        ballY += ballMoveY * ballSpeed;
+        //ballY += ballMoveY * ballSpeed;
+
 
         //MUST REBUILD EVERYTHING FOR EACH MOVEMENT
         ball = new Ellipse2D.Float(ballX, ballY, 30.0f, 30.0f);
@@ -98,7 +103,6 @@ public class Ball {
         box2Area = new Area(box2);
 
         //Collision with walls
-
         if (isCollision(ballArea, walls)){
             if (ballX + 30.0f > panelWidth || ballX < 0){
                 ballMoveX *= -1;
@@ -107,7 +111,32 @@ public class Ball {
             if (ballY + 30.0f > panelHeight || ballY < 0){
                 ballMoveY *= -1;
             }
+        }
 
+        //Collision with boxes MISSING CORNER COLLSIONS - NEED TO TEST WHAT HAPPENS
+        if (isCollision (ballArea, box1Area)){
+            //Ball to the sides of box1
+            if ((ballX > box1X && (ballY > box1Y-15.0f && ballY < box1Y+85.0f)) || (ballX < box1X && (ballY > box1Y-15.0f && ballY < box1Y+85.0f))){
+                ballMoveX *= -1;
+                System.out.println("reverse x");
+            }
+            //Ball to the top or bottom of box1
+            if ((ballY > box1Y && (ballX > box1X-15.0f && ballX < box1X+15.0f)) || (ballY < box1Y && (ballX > box1X-15.0f && ballX < box1X+15.0f))){
+                ballMoveY *=-1;
+            }
+        }
+
+        //Collision for box 2
+        if (isCollision (ballArea, box2Area)){
+            //Ball to the sides of box1
+            if ((ballX > box2X && (ballY > box2Y-15.0f && ballY < box2Y+85.0f)) || (ballX < box2X && (ballY > box2Y-15.0f && ballY < box2Y+85.0f))){
+                ballMoveX *= -1;
+                System.out.println("reverse x");
+            }
+            //Ball to the top or bottom of box1
+            if ((ballY > box2Y && (ballX > box2X-15.0f && ballX < box2X+15.0f)) || (ballY < box2Y && (ballX > box2X-15.0f && ballX < box2X+15.0f))){
+                ballMoveY *=-1;
+            }
         }
 
 
