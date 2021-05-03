@@ -12,11 +12,10 @@ public class Main {
         //create Window
         System.out.println("Start");
         createWindow();
-        NewPanel panel = new NewPanel(100.0f, 100.0f);
-        mainWindow.getContentPane().add(panel);
-        mainWindow.setVisible(true);
 
-        //ball.makeBall();
+        //Making the ball
+        ball = new Ball();
+        //ball.beginBall();
 
 
     }
@@ -28,37 +27,14 @@ public class Main {
         mainWindow.setLocationRelativeTo(null);
         //mainWindow.pack();
         mainWindow.setSize(1200, 600);
+        mainWindow.setResizable(false);
+        mainWindow.setVisible(true);
         System.out.println("Window Displayed");
 
 
+
     }
 
 }
 
-//https://stackoverflow.com/questions/8201705/java-awt-graphics-change-color-after-drawing
-class NewPanel extends JPanel {
-    // Set background in constructor.
-    //can change these values to move it
-    float x;
-    float y;
 
-    public NewPanel (float x, float y)
-    {
-        this.setBackground (Color.cyan);
-        this.x = x;
-        this.y = y;
-    }
-
-    // Override paintComponent(): - this is an exisiting function that becomes changed by this addition
-    public void paintComponent (Graphics g, float x, float y)
-    {
-        Graphics2D graphics2d = (Graphics2D)g;
-        super.paintComponent(g);
-        Shape ball = new Ellipse2D.Float(x, y, 100.0f, 100.0f);
-        graphics2d.draw(ball);
-        graphics2d.setColor(Color.RED);
-        graphics2d.fill(ball);
-        System.out.println ("Inside paintComponent");
-    }
-
-}
