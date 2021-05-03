@@ -2,6 +2,9 @@ import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 
 public class Ball {
@@ -33,11 +36,11 @@ public class Ball {
     static Area box2Area;
     static Area walls;
 
-    float panelHeight = 1194.0f;
-    float panelWidth = 565.0f;
+    float panelWidth = 1194.0f;
+    float panelHeight = 565.0f;
 
-    //speed multiplier
-    float ballSpeed = 1.0f;
+    //speed multiplier, lowered for testing (def: 1.0f)
+    float ballSpeed = 0.5f;
     //store movement of ball, start at default speed
     float ballMoveX = 0.2f;
     float ballMoveY = 0.2f;
@@ -64,63 +67,61 @@ public class Ball {
         ballArea = new Area(ball);
         box1Area = new Area(box1);
         box2Area = new Area(box2);
-        walls = new Area(new Rectangle.Float(0,0, panelHeight, panelWidth));
+        walls = new Area(new Rectangle.Float(0,0, panelWidth, panelHeight));
 
         mainPanel = new GamePanel();
         Main.mainWindow.getContentPane().add(mainPanel);
         Main.mainWindow.setVisible(true);
 
+        //beginBall();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        //runs the frameMaker to create a new frame every 2ms
+        executor.scheduleAtFixedRate(runBall, 0, 2, TimeUnit.MILLISECONDS);
 
-        beginBall();
 
     }
 
 
-
-    public void beginBall(){
-        //This is where the runnable will be initiated
-        for (int i = 0; i < 4000; i++){
-            //speed lowered for testing purposes
-            ballX += ballMoveX*0.5f;
-            ballY += ballMoveY*0.5f;
-
-
-            //MUST REBUILD EVERYTHING FOR EACH MOVEMENT
-            ball = new Ellipse2D.Float(ballX, ballY, 30.0f, 30.0f);
-            box1 = new Rectangle2D.Float(box1X, box1Y, 30.0f, 100.0f);
-            box2 = new Rectangle2D.Float(box2X, box2Y, 30.0f, 100.0f);
-            ballArea = new Area(ball);
-            box1Area = new Area(box1);
-            box2Area = new Area(box2);
-
-            mainPanel.repaint();
-            System.out.println(ballX);
-            try {
-                Thread.sleep(2);
-            } catch (InterruptedException e) {
-                System.out.println("timer failed");
-            }
-        }
-    }
 
     public void ballMove(){
-
+        System.out.println("Starting to move");
 
         ballX += ballMoveX * ballSpeed;
         ballY += ballMoveY * ballSpeed;
+
+        //MUST REBUILD EVERYTHING FOR EACH MOVEMENT
+        ball = new Ellipse2D.Float(ballX, ballY, 30.0f, 30.0f);
+        box1 = new Rectangle2D.Float(box1X, box1Y, 30.0f, 100.0f);
+        box2 = new Rectangle2D.Float(box2X, box2Y, 30.0f, 100.0f);
+        ballArea = new Area(ball);
+        box1Area = new Area(box1);
+        box2Area = new Area(box2);
+
+        //Collision with walls
+
+        if (isCollision(ballArea, walls)){
+            if (ballX + 30.0f > panelWidth || ballX < 0){
+                ballMoveX *= -1;
+                System.out.println("reverse x");
+            }
+            if (ballY + 30.0f > panelHeight || ballY < 0){
+                ballMoveY *= -1;
+            }
+
+        }
+
+
         mainPanel.repaint();
+
     }
 
     //The ball's movement
     Runnable runBall = new Runnable(){
         @Override
         public void run(){
+
             ballMove();
-            try {
-                Thread.sleep(2);
-            } catch (InterruptedException e) {
-                System.out.println("timer failed");
-            }
+            //May need to change this later to schedule at fixed rate
 
         }
     };
@@ -141,8 +142,6 @@ public class Ball {
         }
         return coll;
     }
-
-
 }
 
 //https://stackoverflow.com/questions/8201705/java-awt-graphics-change-color-after-drawing something similar?
@@ -177,11 +176,12 @@ class GamePanel extends JPanel {
     {
         Graphics2D graphics2d = (Graphics2D)g;
         super.paintComponent(g);
-
+        graphics2d.draw(Ball.walls);
+        graphics2d.setColor(Color.LIGHT_GRAY);
+        graphics2d.fill(Ball.walls);
         graphics2d.draw(Ball.ball);
         graphics2d.draw(Ball.box1);
         graphics2d.draw(Ball.box2);
-
         //testing
         /*
         Shape ball1 = new Ellipse2D.Float(Ball.ballX, Ball.ballY, 30.0f, 30.0f);
@@ -191,7 +191,6 @@ class GamePanel extends JPanel {
         //THE INSIDE VALUE ISN'T CHANGING
         System.out.println(ballX + " inside");*/
 
-
         //for some reason it's like a brush
         graphics2d.setColor(Color.red);
         graphics2d.fill(Ball.ball);
@@ -199,10 +198,35 @@ class GamePanel extends JPanel {
         graphics2d.fill(Ball.box1);
         graphics2d.setColor(Color.green);
         graphics2d.fill(Ball.box2);
+
         System.out.println ("Inside paintComponent");
     }
 
 }
+
+
+/*
+    public void beginBall(){
+        //This is where the runnable will be initiated
+        for (int i = 0; i < 4000; i++){
+            //speed lowered for testing purposes
+            ballX += ballMoveX*0.5f;
+            ballY += ballMoveY*0.5f;
+
+            //MUST REBUILD EVERYTHING FOR EACH MOVEMENT
+            ball = new Ellipse2D.Float(ballX, ballY, 30.0f, 30.0f);
+            box1 = new Rectangle2D.Float(box1X, box1Y, 30.0f, 100.0f);
+            box2 = new Rectangle2D.Float(box2X, box2Y, 30.0f, 100.0f);
+            ballArea = new Area(ball);
+            box1Area = new Area(box1);
+            box2Area = new Area(box2);
+
+            mainPanel.repaint();
+            System.out.println(ballX);
+
+        }
+    }
+ */
 
 
 
