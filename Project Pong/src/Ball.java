@@ -5,17 +5,12 @@ import java.awt.geom.Rectangle2D;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import javax.swing.*;
 
 public class Ball {
     static GamePanel mainPanel;
-    /*
-    static float ballX;
-    static float ballY;
-    static float box1X;
-    static float box1Y;
-    static float box2X;
-    static float box2Y;*/
 
     static float ballX = 594.0f;
     static float ballY = 297.5f;
@@ -23,10 +18,6 @@ public class Ball {
     static float box1Y = 267.5f;
     static float box2X = 1094.0f;
     static float box2Y = 267.5f;
-
-
-
-
 
     static Shape ball;
     static Shape box1;
@@ -42,8 +33,16 @@ public class Ball {
     //speed multiplier, lowered for testing (def: 1.0f)
     float ballSpeed = 0.5f;
     //store movement of ball, start at default speed
-    float ballMoveX = 0.2f;
-    float ballMoveY = 0.2f;
+    float ballMoveX = 0.1f;
+    float ballMoveY = 0.1f;
+    //Movement speed of box for easy adjustment
+    float boxSpeed = 0.1f;
+
+    //booleans to move boxes
+    boolean box1MoveUp = false;
+    boolean box2MoveUp = false;
+    boolean box1MoveDown = false;
+    boolean box2MoveDown = false;
 
 
 
@@ -81,26 +80,41 @@ public class Ball {
         //beginBall();
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         //runs the frameMaker to create a new frame every 2ms
-        executor.scheduleAtFixedRate(runBall, 0, 2, TimeUnit.MILLISECONDS);
+        executor.scheduleAtFixedRate(runBall, 0, 1, TimeUnit.MILLISECONDS);
 
+        //for the box
+        ScheduledExecutorService executorBox1 = Executors.newScheduledThreadPool(1);
+        //runs the frameMaker to create a new frame every 2ms
+        //executor.scheduleAtFixedRate(runBox1, 0, 1, TimeUnit.MILLISECONDS);
+
+
+
+        Main.mainWindow.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+            @Override
+            public void keyPressed(KeyEvent e) {
+                boxKeyRead(e);
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
 
     }
 
 
     //the movement that will be made repeatedly (calculating everything)
     public void ballMove(){
-        System.out.println("Starting to move");
+        //System.out.println("Starting to move");
         ballX += ballMoveX * ballSpeed;
         //ballY += ballMoveY * ballSpeed;
 
-
         //MUST REBUILD EVERYTHING FOR EACH MOVEMENT
         ball = new Ellipse2D.Float(ballX, ballY, 30.0f, 30.0f);
-        box1 = new Rectangle2D.Float(box1X, box1Y, 30.0f, 100.0f);
-        box2 = new Rectangle2D.Float(box2X, box2Y, 30.0f, 100.0f);
         ballArea = new Area(ball);
-        box1Area = new Area(box1);
-        box2Area = new Area(box2);
 
         //Collision with walls
         if (isCollision(ballArea, walls)){
@@ -138,20 +152,77 @@ public class Ball {
                 ballMoveY *=-1;
             }
         }
-
-
         mainPanel.repaint();
-
     }
+
+    public void boxMove(){
+        //move the boxes by redrawing
+        box1 = new Rectangle2D.Float(box1X, box1Y, 30.0f, 100.0f);
+        box2 = new Rectangle2D.Float(box2X, box2Y, 30.0f, 100.0f);
+        box1Area = new Area(box1);
+        box2Area = new Area(box2);
+        mainPanel.repaint();
+    }
+
+    public void boxKeyRead(KeyEvent e){
+        int key = e.getKeyCode();
+        switch (key){
+            case KeyEvent.VK_UP:
+                //move up box2
+                box2MoveUp = true;
+                boolean box1MoveUp = false;
+                boolean box2MoveUp = false;
+                boolean box1MoveDown = false;
+                boolean box2MoveDown = false;
+                break;
+            case KeyEvent.VK_DOWN:
+                box2MoveUp = false;
+
+        }
+    }
+
+
+    Runnable moveBox1Up = new Runnable(){
+        @Override
+        public void run(){
+
+        }
+    };
+
+    Runnable moveBox1Down = new Runnable(){
+        @Override
+        public void run(){
+
+        }
+    };
+    Runnable moveBox2Up = new Runnable(){
+        @Override
+        public void run(){
+            while (box2MoveUp == true){
+                box2X += boxSpeed;
+                boxMove();
+            }
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                System.out.println("timer failed");
+            }
+        }
+    };
+    Runnable moveBox2Down = new Runnable(){
+        @Override
+        public void run(){
+
+        }
+    };
+
 
     //The ball's movement
     Runnable runBall = new Runnable(){
         @Override
         public void run(){
-
             ballMove();
             //May need to change this later to schedule at fixed rate
-
         }
     };
 
