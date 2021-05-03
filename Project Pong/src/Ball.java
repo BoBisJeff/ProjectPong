@@ -38,9 +38,9 @@ public class Ball {
 
     //speed multiplier
     float ballSpeed = 1.0f;
-    //store movement of ball
-    float ballMoveX = 0.1f;
-    float ballMoveY = 0.1f;
+    //store movement of ball, start at default speed
+    float ballMoveX = 0.2f;
+    float ballMoveY = 0.2f;
 
 
 
@@ -66,7 +66,7 @@ public class Ball {
         box2Area = new Area(box2);
         walls = new Area(new Rectangle.Float(0,0, panelHeight, panelWidth));
 
-        mainPanel = new GamePanel(ball, box1, box2, ballX, ballY);
+        mainPanel = new GamePanel();
         Main.mainWindow.getContentPane().add(mainPanel);
         Main.mainWindow.setVisible(true);
 
@@ -79,23 +79,30 @@ public class Ball {
 
     public void beginBall(){
         //This is where the runnable will be initiated
-        for (int i = 0; i < 400; i++){
+        for (int i = 0; i < 4000; i++){
+            //speed lowered for testing purposes
+            ballX += ballMoveX*0.5f;
+            ballY += ballMoveY*0.5f;
 
-            ballX += 1.0f;
-            //ballY += 0.1f;
-            //for some reason repainting is not moving the ball.
+
+            //MUST REBUILD EVERYTHING FOR EACH MOVEMENT
+            ball = new Ellipse2D.Float(ballX, ballY, 30.0f, 30.0f);
+            box1 = new Rectangle2D.Float(box1X, box1Y, 30.0f, 100.0f);
+            box2 = new Rectangle2D.Float(box2X, box2Y, 30.0f, 100.0f);
+            ballArea = new Area(ball);
+            box1Area = new Area(box1);
+            box2Area = new Area(box2);
+
             mainPanel.repaint();
             System.out.println(ballX);
             try {
-                Thread.sleep(100);
+                Thread.sleep(2);
             } catch (InterruptedException e) {
                 System.out.println("timer failed");
             }
         }
     }
 
-    //commented out for testing
-    /*
     public void ballMove(){
 
 
@@ -116,7 +123,7 @@ public class Ball {
             }
 
         }
-    };*/
+    };
 
     public boolean isCollision(Area a1, Area a2){
         boolean coll = false;
@@ -142,25 +149,27 @@ public class Ball {
 class GamePanel extends JPanel {
     // Set background in constructor.
     //can change these values to move it
-    Shape ball;
-    Shape box1;
+
+   /* Shape ball = Ball.ball;
+    Shape box1 = Ball.box1;
     Shape box2;
 
     //testing
-    float ballX;
-    float ballY;
+    float ballX = Ball.ballX;
+    float ballY = Ball.ballY;*/
 
-    public GamePanel (Shape ball, Shape box1, Shape box2, float ballX, float ballY)
+    //PROBLEM: When ball is changed outside, the ball isn't changed inside - they aren't linked
+    //Potential SOLUTION: use BALL.---
+
+    public GamePanel ()
     {
         this.setBackground (Color.white);
-        this.ball = ball;
-        this.box1 = box1;
-        this.box2 = box2;
-        System.out.println("Made");
+        //Shape ball, Shape box1, Shape box2, float x, float y
 
-        //testing
-        this.ballX = ballX;
-        this.ballY = ballY;
+        /*this.ball = ball;
+        this.box1 = box1;
+        this.box2 = box2;*/
+        System.out.println("Made");;
     }
 
     // Override paintComponent(): - this is an existing function that becomes changed by this addition
@@ -169,27 +178,27 @@ class GamePanel extends JPanel {
         Graphics2D graphics2d = (Graphics2D)g;
         super.paintComponent(g);
 
-        graphics2d.draw(ball);
-        graphics2d.draw(box1);
-        graphics2d.draw(box2);
+        graphics2d.draw(Ball.ball);
+        graphics2d.draw(Ball.box1);
+        graphics2d.draw(Ball.box2);
 
         //testing
-        Shape ball1 = new Ellipse2D.Float(ballX, ballY, 30.0f, 30.0f);
+        /*
+        Shape ball1 = new Ellipse2D.Float(Ball.ballX, Ball.ballY, 30.0f, 30.0f);
         graphics2d.draw(ball1);
         graphics2d.setColor(Color.yellow);
         graphics2d.fill(ball1);
         //THE INSIDE VALUE ISN'T CHANGING
-        System.out.println(ballX + " inside");
-
+        System.out.println(ballX + " inside");*/
 
 
         //for some reason it's like a brush
         graphics2d.setColor(Color.red);
-        graphics2d.fill(ball);
+        graphics2d.fill(Ball.ball);
         graphics2d.setColor(Color.blue);
-        graphics2d.fill(box1);
+        graphics2d.fill(Ball.box1);
         graphics2d.setColor(Color.green);
-        graphics2d.fill(box2);
+        graphics2d.fill(Ball.box2);
         System.out.println ("Inside paintComponent");
     }
 
